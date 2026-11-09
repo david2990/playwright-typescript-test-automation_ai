@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+results/
+
+# saved authentication state (contains live session cookies)
+auth/*.json
+
+# local secrets
+.env
+.env.*
+!.env.example
+
+# local portable tooling
+.tools/
+
+# logs and OS noise
+*.log
+.DS_Store
+Thumbs.db

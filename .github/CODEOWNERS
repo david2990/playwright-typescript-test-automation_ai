@@ -1,0 +1,6 @@
+# Replace @your-org/qa-team with the real GitHub team or user before relying on this.
+# Smoke pack changes are gated on the QA owner reviewing them.
+/tests/smoke/            @your-org/qa-team
+/tests/authenticated/    @your-org/qa-team
+/Jenkinsfile             @your-org/qa-team
+/src/                    @your-org/qa-team
