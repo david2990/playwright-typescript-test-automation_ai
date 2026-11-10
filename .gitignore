@@ -4,6 +4,10 @@ node_modules/
 # playwright artifacts
 test-results/
 playwright-report/
+
+# allure raw results and generated report
+allure-results/
+allure-report/
 blob-report/
 results/
 
@@ -22,3 +26,6 @@ auth/*.json
 *.log
 .DS_Store
 Thumbs.db
+
+# allure history (managed by CI)
+.allure/

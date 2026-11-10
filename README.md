@@ -21,16 +21,18 @@ npm run report                  # open the HTML report
 
 ## Scripts
 
-| Command                     | Purpose                                             |
-| --------------------------- | --------------------------------------------------- |
-| `npm test`                  | Run every test in all projects                      |
-| `npm run test:smoke`        | Smoke pack only (`@smoke`, excluding `@quarantine`) |
-| `npm run test:smoke:headed` | Same, with a visible browser for debugging          |
-| `npm run test:ui`           | Playwright UI mode                                  |
-| `npm run report`            | Open the last HTML report                           |
-| `npm run typecheck`         | `tsc --noEmit`                                      |
-| `npm run lint`              | ESLint                                              |
-| `npm run format`            | Prettier write                                      |
+| Command                      | Purpose                                             |
+| ---------------------------- | --------------------------------------------------- |
+| `npm test`                   | Run every test in all projects                      |
+| `npm run test:smoke`         | Smoke pack only (`@smoke`, excluding `@quarantine`) |
+| `npm run test:smoke:headed`  | Same, with a visible browser for debugging          |
+| `npm run test:ui`            | Playwright UI mode                                  |
+| `npm run report`             | Open the last Playwright HTML report                |
+| `npm run report:allure`      | Build the Allure report into `allure-report/`       |
+| `npm run report:allure:open` | Serve the last Allure report locally                |
+| `npm run typecheck`          | `tsc --noEmit`                                      |
+| `npm run lint`               | ESLint                                              |
+| `npm run format`             | Prettier write                                      |
 
 ## Watching a run
 
@@ -80,6 +82,7 @@ They are excluded from `@smoke` because they create real data (TC-001 registers 
 | `WORKERS`   | no              | Worker count in CI (default 4)                                          |
 | `SLOWMO`    | no              | Milliseconds to slow every action down (e.g. `800`) when watching a run |
 | `VIDEO`     | no              | `on` records every run to `test-results/`, not just failures            |
+| `ALLURE`    | no              | `on` adds the Allure reporter and writes `allure-results/`              |
 
 Locally these come from `.env` (gitignored). In Jenkins they are injected from the
 `demowebshop-test-user` credential — never committed.
@@ -116,6 +119,48 @@ Both upload the HTML report and the JUnit XML, plus traces, videos and screensho
 test fails. The Jenkins pipeline remains as a fallback and runs the same pack via
 `cron('H */2 * * *')`, publishing the same reports. Full setup steps:
 [docs/jenkins-setup.md](docs/jenkins-setup.md).
+
+## Allure reporting
+
+Allure ([Playwright + TypeScript guide](https://allurereport.org/docs/playwright/)) is
+opt-in so normal runs stay fast: it only activates when `ALLURE=on`.
+
+```bash
+ALLURE=on npx playwright test --grep @regression   # writes allure-results/
+npm run report:allure                              # builds allure-report/
+npm run report:allure:open                         # serves it on localhost
+```
+
+### Publishing the report
+
+`ci.yml` publishes every `main` build to the `gh-pages` branch with
+[`peaceiris/actions-gh-pages`](https://github.com/peaceiris/actions-gh-pages), which serves
+the report from:
+
+```
+https://<owner>.github.io/playwright-typescript-test-automation_ai/
+```
+
+One-time setup: **Settings → Pages → Build and deployment → Source: Deploy from a branch
+→ Branch: `gh-pages` → `/ (root)` → Save**. The branch is created by the first run that
+reaches the publish step. The Allure HTML report uses only relative URLs, so it works at
+that sub-path unchanged.
+
+The same job posts a run summary table on pull requests and a quality-gate check through
+the [Allure GitHub Action](https://allurereport.org/docs/integrations-github-action/)
+(`allure-framework/allure-action@v0`), linking each row to the published report via
+`remote-href`. Fork pull requests get a read-only token, so that step is skipped there.
+
+### History and trends
+
+Allure 3 keeps run-to-run history in `.allure/history.jsonl` (see
+[`allurerc.json`](allurerc.json)). The workflows restore that file with `actions/cache`
+(`restore-keys: allure-history-`) before generating, so trends accumulate across runs.
+For durable, per-branch history without cache eviction, deploy the free
+[Allure Storage Service](https://allurereport.org/docs/self-hosted-storage/) (Docker or
+Cloudflare Workers) and set `allureService.accessToken` with `publish: true` in the
+`awesome` plugin — the report URL then comes back in `summary.json` and `remote-href` is
+no longer needed.
 
 ## Conventions
 

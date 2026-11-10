@@ -1,8 +1,15 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
 import 'dotenv/config';
 
 const isCI = !!process.env.CI;
 const baseURL = process.env.BASE_URL?.trim() || 'https://demowebshop.tricentis.com';
+
+// Raw Allure results are only written when ALLURE=on, so local runs keep their current output.
+// The HTML report is generated from these files afterwards (see the CI workflows).
+const allureReporter: ReporterDescription = [
+  'allure-playwright',
+  { resultsDir: 'allure-results', detail: true, suiteTitle: true },
+];
 
 export default defineConfig({
   testDir: './tests',
@@ -17,6 +24,7 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['junit', { outputFile: 'results/junit.xml' }],
+    ...(process.env.ALLURE === 'on' ? [allureReporter] : []),
   ],
   use: {
     baseURL,
@@ -28,6 +36,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // SLOWMO=800 slows every action down so a run can be watched; VIDEO=on records any run, not just failures.
+    // ALLURE=on adds the Allure reporter (raw results in allure-results/).
     launchOptions: { slowMo: Number(process.env.SLOWMO ?? 0) },
     video: process.env.VIDEO === 'on' ? 'on' : 'retain-on-failure',
   },
