@@ -31,8 +31,8 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-  smoke:
-    name: Smoke pack
+  manual-cases:
+    name: Manual test cases (TC-001 to TC-003)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: checks
@@ -40,7 +40,7 @@ jobs:
       contents: write # push the Allure report to the gh-pages branch
       pull-requests: write # Allure summary comment on pull requests
       checks: write # Allure quality gate check
-    # Serialise with the daily manual-case publish so both cannot push gh-pages at once.
+    # Serialise with the daily run so both cannot push gh-pages at once.
     concurrency:
       group: gh-pages-publish
       cancel-in-progress: false
@@ -65,14 +65,10 @@ jobs:
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      # Secrets are available on same-repo branches but never to fork pull requests,
-      # so run the credential-dependent pack only when the test account is configured.
-      - name: Smoke pack (with test account)
-        if: env.TEST_PASS != ''
-        run: npm run test:smoke
-      - name: Smoke pack (guest only, no credentials)
-        if: env.TEST_PASS == ''
-        run: npx playwright test --grep @smoke --project=chromium --no-deps
+      # TC-002 and TC-003 skip themselves (not fail) when the test account secrets
+      # are absent, which is the case for pull requests from forks.
+      - name: Run the three manual cases
+        run: npm run test:cases
       # Allure 3 keeps run-to-run history in .allure/history.jsonl, so carry it
       # between runs; each new key restores the newest existing history first.
       - name: Restore Allure history
@@ -112,12 +108,12 @@ jobs:
         with:
           report-directory: ./allure-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          remote-href: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/smoke/
+          remote-href: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           sections: |
             new
             flaky
-      # The site root belongs to the daily manual-case report, so the smoke pack
-      # publishes under /smoke/ and keeps whatever else is on the branch.
+      # The report replaces the gh-pages content, so this also removes anything
+      # a previous layout left behind.
       - name: Publish Allure report to GitHub Pages
         if: always() && github.ref == 'refs/heads/main' && hashFiles('allure-report/index.html') != ''
         uses: peaceiris/actions-gh-pages@v4
@@ -125,9 +121,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./allure-report
-          destination_dir: smoke
-          keep_files: true
-          full_commit_message: Publish smoke report for ${{ github.sha }}
+          full_commit_message: Publish manual-case report for ${{ github.sha }}
       - name: Upload failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4

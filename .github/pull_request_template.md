@@ -4,8 +4,7 @@
 
 ## Type of change
 
-- [ ] New smoke test
-- [ ] New regression test
+- [ ] Change to one of the three manual cases (TC-001, TC-002, TC-003)
 - [ ] Page object / framework change
 - [ ] CI or configuration change
 - [ ] Documentation
@@ -14,11 +13,10 @@
 
 - [ ] `npm run typecheck`
 - [ ] `npm run lint`
-- [ ] `npm run test:smoke` passes locally
-- [ ] Smoke pack still finishes in under 10 minutes
+- [ ] `npm run test:cases` passes locally (3 tests)
 
-## Smoke pack impact
+## Case impact
 
-- [ ] No change to the smoke pack
-- [ ] Added a test (runtime impact: +____ s)
-- [ ] Removed or quarantined a test (reason: ____)
+- [ ] No change to what the three cases verify
+- [ ] Added or changed a verification step (which case: ____)
+- [ ] Removed a verification step (reason: ____)

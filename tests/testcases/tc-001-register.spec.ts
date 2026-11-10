@@ -10,8 +10,8 @@ import type { RegistrationDetails } from '../../src/pages/register.page';
  * 4. Click on Log out link
  *
  * Each run registers a brand new customer, because the demo shop rejects a
- * duplicate email address. Tagged @regression (not @smoke) so the 2-hourly
- * smoke pack does not create an account on every run.
+ * duplicate email address. Tagged @regression, which is what the CI pipelines
+ * select, so this case runs once a day and on pushes to main.
  */
 test.describe('TC-001 Register @regression @tc-001', () => {
   test('registers a new customer and logs out', async ({

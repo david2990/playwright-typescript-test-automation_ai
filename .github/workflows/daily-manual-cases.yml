@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write # publish the Allure report to the gh-pages branch
-    # Serialise with the CI smoke publish so both cannot push gh-pages at once.
+    # Serialise with the CI publish so both cannot push gh-pages at once.
     concurrency:
       group: gh-pages-publish
       cancel-in-progress: false
@@ -59,10 +59,10 @@ jobs:
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      # --project=chromium --no-deps keeps this to exactly the three cases:
-      # without them Playwright also runs the auth-setup project they depend on.
+      # The npm script pins --grep @regression --project=chromium --no-deps,
+      # so only the three manual cases run.
       - name: Run the three manual cases
-        run: npx playwright test --grep @regression --project=chromium --no-deps
+        run: npm run test:cases
       # Allure 3 keeps run-to-run history in .allure/history.jsonl, so the daily
       # report keeps its trends; each key restores the newest history first.
       - name: Restore Allure history
@@ -91,8 +91,7 @@ jobs:
             playwright-report/
             results/junit.xml
           retention-days: 14
-      # Served at https://<owner>.github.io/<repo>/ (site root), with the smoke
-      # pack's report kept alongside under /smoke/.
+      # Served at https://<owner>.github.io/<repo>/ (site root).
       - name: Publish the report to GitHub Pages
         if: always() && hashFiles('allure-report/index.html') != ''
         uses: peaceiris/actions-gh-pages@v4
@@ -100,7 +99,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./allure-report
-          keep_files: true
           full_commit_message: Publish manual case report for ${{ github.sha }}
       - name: Upload failure artifacts
         if: failure()

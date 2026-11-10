@@ -25,8 +25,8 @@ pipeline {
     )
   }
 
-  // Every two hours, at a load-balanced minute rather than exactly on the hour.
-  triggers { cron('H */2 * * *') }
+  // Daily, at a load-balanced minute rather than exactly on the hour.
+  triggers { cron('H 5 * * *') }
 
   environment {
     CI      = 'true'
@@ -61,7 +61,7 @@ pipeline {
       }
     }
 
-    stage('Smoke tests') {
+    stage('Manual test cases') {
       steps {
         withCredentials([
           usernamePassword(
@@ -70,7 +70,7 @@ pipeline {
             passwordVariable: 'TEST_PASS'
           )
         ]) {
-          sh 'npm run test:smoke'
+          sh 'npm run test:cases'
         }
       }
     }
@@ -91,12 +91,12 @@ pipeline {
       cleanWs()
     }
     failure {
-      echo "Smoke pack FAILED - see ${env.BUILD_URL}playwright-report/ and the archived traces."
-      // slackSend(color: 'danger', message: "SMOKE FAILED ${env.BUILD_URL}")
+      echo "Manual test cases FAILED - see ${env.BUILD_URL}playwright-report/ and the archived traces."
+      // slackSend(color: 'danger', message: "MANUAL CASES FAILED ${env.BUILD_URL}")
     }
     fixed {
-      echo "Smoke pack is green again - ${env.BUILD_URL}"
-      // slackSend(color: 'good', message: "SMOKE RECOVERED ${env.BUILD_URL}")
+      echo "Manual test cases are green again - ${env.BUILD_URL}"
+      // slackSend(color: 'good', message: "MANUAL CASES RECOVERED ${env.BUILD_URL}")
     }
   }
 }

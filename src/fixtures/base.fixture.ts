@@ -1,20 +1,16 @@
 import { test as base, expect } from '@playwright/test';
-import { CartPage } from '../pages/cart.page';
 import { CategoryPage } from '../pages/category.page';
 import { HeaderComponent } from '../pages/header.component';
 import { HomePage } from '../pages/home.page';
 import { LoginPage } from '../pages/login.page';
 import { ProductPage } from '../pages/product.page';
 import { RegisterPage } from '../pages/register.page';
-import { SearchPage } from '../pages/search.page';
 
 type PageFixtures = {
   homePage: HomePage;
   loginPage: LoginPage;
   categoryPage: CategoryPage;
   productPage: ProductPage;
-  cartPage: CartPage;
-  searchPage: SearchPage;
   registerPage: RegisterPage;
   header: HeaderComponent;
 };
@@ -35,12 +31,6 @@ export const test = base.extend<PageFixtures>({
   },
   productPage: async ({ page }, use) => {
     await use(new ProductPage(page));
-  },
-  cartPage: async ({ page }, use) => {
-    await use(new CartPage(page));
-  },
-  searchPage: async ({ page }, use) => {
-    await use(new SearchPage(page));
   },
   registerPage: async ({ page }, use) => {
     await use(new RegisterPage(page));

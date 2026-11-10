@@ -12,7 +12,6 @@ export const env = {
   baseUrl,
   credentials: { email, password },
   hasCredentials: email.length > 0 && password.length > 0,
-  storageStatePath: 'auth/standard-user.json',
 } as const;
 
 export function requireCredentials(): { email: string; password: string } {

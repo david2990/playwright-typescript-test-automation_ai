@@ -40,25 +40,12 @@ export default defineConfig({
     launchOptions: { slowMo: Number(process.env.SLOWMO ?? 0) },
     video: process.env.VIDEO === 'on' ? 'on' : 'retain-on-failure',
   },
+  // The suite is the three manual test cases in tests/testcases, so there is a
+  // single project and no setup dependency: every case logs in for itself.
   projects: [
     {
-      name: 'auth-setup',
-      testMatch: /auth\.setup\.ts/,
-    },
-    {
       name: 'chromium',
-      testIgnore: [/authenticated\//, /auth\.setup\.ts/],
       use: { ...devices['Desktop Chrome'] },
-      dependencies: ['auth-setup'],
-    },
-    {
-      name: 'chromium-authenticated',
-      testMatch: /authenticated\//,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'auth/standard-user.json',
-      },
-      dependencies: ['auth-setup'],
     },
   ],
 });

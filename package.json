@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "playwright test",
-    "test:smoke": "playwright test --grep @smoke --grep-invert @quarantine",
-    "test:smoke:headed": "playwright test --grep @smoke --grep-invert @quarantine --headed",
+    "test:cases": "playwright test --grep @regression --project=chromium --no-deps",
+    "test:cases:headed": "playwright test --grep @regression --project=chromium --no-deps --headed",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
     "report:allure": "allure generate allure-results -o allure-report --clean",

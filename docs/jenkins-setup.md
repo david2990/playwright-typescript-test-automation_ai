@@ -37,7 +37,7 @@ The pipeline exposes them as `TEST_USER` / `TEST_PASS`. Nothing is written to th
 1. New Item → **Multibranch Pipeline** (or Pipeline → Pipeline script from SCM with `Jenkinsfile`).
 2. Branch source: the GitHub repository, script path `Jenkinsfile`.
 3. Build triggers: enable **GitHub hook trigger for GITScm polling**. `Jenkinsfile` already declares
-   `triggers { cron('H */2 * * *') }` — every two hours at a load-balanced minute.
+   `triggers { cron('H 5 * * *') }` — daily at a load-balanced minute.
 4. Ensure the **JUnit**, **HTML Publisher** and (optionally) **Slack** plugins are installed.
 
 For a non-multibranch job, `cron` and the webhook both still work; multibranch is preferred so
@@ -48,7 +48,7 @@ feature branches get the same checks.
 Trigger a build manually and confirm:
 
 - [ ] `Typecheck` and `Lint` stages pass
-- [ ] `Smoke tests` stage runs 17 tests (16 smoke + session setup)
+- [ ] `Manual test cases` stage runs the three manual cases (TC-001, TC-002, TC-003)
 - [ ] **Test Result** trend appears from `results/junit.xml`
 - [ ] **Playwright report** link opens the HTML report
 - [ ] On a failure, `test-results/**` contains the trace and video
@@ -66,12 +66,12 @@ Jenkins PR build.
 
 ## 6. Tuning
 
-| Symptom                   | Action                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Builds exceed ten minutes | Increase `WORKERS`, or shard: `--shard=$STAGE/2` in parallel stages                                      |
-| Flaky failures            | Inspect the trace, fix the test, or tag `@quarantine` — don't raise retries                              |
-| Browser download slow     | Cache `~/.cache/ms-playwright` on the agent                                                              |
-| Clock drift on cron       | `H */2 * * *` deliberately avoids the top of the hour; adjust only if the maintenance window requires it |
+| Symptom                   | Action                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Builds exceed ten minutes | Increase `WORKERS`, or shard: `--shard=$STAGE/2` in parallel stages                                    |
+| Flaky failures            | Inspect the trace, fix the test, or tag `@quarantine` — don't raise retries                            |
+| Browser download slow     | Cache `~/.cache/ms-playwright` on the agent                                                            |
+| Clock drift on cron       | `H 5 * * *` deliberately avoids the top of the hour; adjust only if the maintenance window requires it |
 
 ## 7. Notifications
 

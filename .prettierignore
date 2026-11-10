@@ -3,5 +3,7 @@ playwright-report/
 test-results/
 blob-report/
 results/
-auth/
+allure-results/
+allure-report/
+.allure/
 package-lock.json
