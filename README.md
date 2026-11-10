@@ -21,16 +21,16 @@ npm run report                  # open the HTML report
 
 ## Scripts
 
-| Command | Purpose |
-| --- | --- |
-| `npm test` | Run every test in all projects |
-| `npm run test:smoke` | Smoke pack only (`@smoke`, excluding `@quarantine`) |
-| `npm run test:smoke:headed` | Same, with a visible browser for debugging |
-| `npm run test:ui` | Playwright UI mode |
-| `npm run report` | Open the last HTML report |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier write |
+| Command                     | Purpose                                             |
+| --------------------------- | --------------------------------------------------- |
+| `npm test`                  | Run every test in all projects                      |
+| `npm run test:smoke`        | Smoke pack only (`@smoke`, excluding `@quarantine`) |
+| `npm run test:smoke:headed` | Same, with a visible browser for debugging          |
+| `npm run test:ui`           | Playwright UI mode                                  |
+| `npm run report`            | Open the last HTML report                           |
+| `npm run typecheck`         | `tsc --noEmit`                                      |
+| `npm run lint`              | ESLint                                              |
+| `npm run format`            | Prettier write                                      |
 
 ## Watching a run
 
@@ -71,15 +71,15 @@ They are excluded from `@smoke` because they create real data (TC-001 registers 
 
 ## Configuration
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `BASE_URL` | no | Application URL, defaults to the demo shop |
-| `TEST_USER` | for login tests | Test account email |
-| `TEST_PASS` | for login tests | Test account password |
-| `CI` | set by Jenkins | Enables retries, `forbidOnly` and 4 workers |
-| `WORKERS` | no | Worker count in CI (default 4) |
-| `SLOWMO` | no | Milliseconds to slow every action down (e.g. `800`) when watching a run |
-| `VIDEO` | no | `on` records every run to `test-results/`, not just failures |
+| Variable    | Required        | Description                                                             |
+| ----------- | --------------- | ----------------------------------------------------------------------- |
+| `BASE_URL`  | no              | Application URL, defaults to the demo shop                              |
+| `TEST_USER` | for login tests | Test account email                                                      |
+| `TEST_PASS` | for login tests | Test account password                                                   |
+| `CI`        | set by Jenkins  | Enables retries, `forbidOnly` and 4 workers                             |
+| `WORKERS`   | no              | Worker count in CI (default 4)                                          |
+| `SLOWMO`    | no              | Milliseconds to slow every action down (e.g. `800`) when watching a run |
+| `VIDEO`     | no              | `on` records every run to `test-results/`, not just failures            |
 
 Locally these come from `.env` (gitignored). In Jenkins they are injected from the
 `demowebshop-test-user` credential — never committed.
@@ -89,10 +89,10 @@ Locally these come from `.env` (gitignored). In Jenkins they are injected from t
 
 ## Projects
 
-| Project | Scope |
-| --- | --- |
-| `auth-setup` | Logs in once and writes `auth/standard-user.json` |
-| `chromium` | Guest tests (`tests/smoke`) |
+| Project                  | Scope                                                   |
+| ------------------------ | ------------------------------------------------------- |
+| `auth-setup`             | Logs in once and writes `auth/standard-user.json`       |
+| `chromium`               | Guest tests (`tests/smoke`)                             |
 | `chromium-authenticated` | Tests in `tests/authenticated`, using the saved session |
 
 ## Smoke pack
@@ -103,9 +103,19 @@ minutes, every test is owned, and a test that only passes on retry is quarantine
 
 ## CI
 
-Jenkins runs the pack every two hours via `cron('H */2 * * *')`, publishes JUnit results
-and the Playwright HTML report, and archives traces/videos for failures. Full setup
-steps: [docs/jenkins-setup.md](docs/jenkins-setup.md).
+GitHub Actions in `.github/workflows/` is the primary gate:
+
+- `ci.yml` runs on every pull request and on pushes to `main`: typecheck, lint, format
+  check, then the smoke pack. `TEST_USER` / `TEST_PASS` come from repository secrets;
+  runs without them (fork pull requests) fall back to the guest-only pack with
+  `--project=chromium --no-deps`, which skips the login setup project.
+- `smoke.yml` runs every two hours (`cron('17 */2 * * *')`, UTC) and can be dispatched
+  manually with a tag (`@smoke`, `@regression`, `@tc-003`) or a different `BASE_URL`.
+
+Both upload the HTML report and the JUnit XML, plus traces, videos and screenshots when a
+test fails. The Jenkins pipeline remains as a fallback and runs the same pack via
+`cron('H */2 * * *')`, publishing the same reports. Full setup steps:
+[docs/jenkins-setup.md](docs/jenkins-setup.md).
 
 ## Conventions
 

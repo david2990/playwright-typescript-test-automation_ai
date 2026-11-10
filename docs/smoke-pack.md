@@ -5,18 +5,18 @@ It runs every two hours in Jenkins and must finish in under ten minutes.
 
 ## Contents
 
-| # | Journey | Spec | Test |
-| --- | --- | --- | --- |
-| 1 | Storefront renders with header, categories and footer | `tests/smoke/01-home.spec.ts` | loads the storefront… |
-| 2 | Storefront renders without uncaught JS errors | `tests/smoke/01-home.spec.ts` | renders without uncaught JavaScript errors |
-| 3 | Every top-level category opens and lists products | `tests/smoke/02-navigation.spec.ts` | opens the "<category>" category (7 tests) |
-| 4 | Search returns matching products | `tests/smoke/03-search.spec.ts` | returns matching products for a known term |
-| 5 | Search empty state works | `tests/smoke/03-search.spec.ts` | shows an empty-state message when nothing matches |
-| 6 | Invalid credentials are rejected | `tests/smoke/04-authentication.spec.ts` | rejects invalid credentials |
-| 7 | Valid credentials sign in and sign out | `tests/smoke/04-authentication.spec.ts` | signs in with valid credentials and signs out again |
-| 8 | Product detail shows name, price and add-to-cart | `tests/smoke/06-product-detail.spec.ts` | shows name, price, quantity and add-to-cart controls |
-| 9 | Add to cart → verify → remove | `tests/smoke/05-shopping-cart.spec.ts` | adds a product to the cart, shows it, then removes it |
-| 10 | Saved session reaches the account page | `tests/authenticated/account.spec.ts` | saved session state opens the account page |
+| #   | Journey                                               | Spec                                    | Test                                                  |
+| --- | ----------------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| 1   | Storefront renders with header, categories and footer | `tests/smoke/01-home.spec.ts`           | loads the storefront…                                 |
+| 2   | Storefront renders without uncaught JS errors         | `tests/smoke/01-home.spec.ts`           | renders without uncaught JavaScript errors            |
+| 3   | Every top-level category opens and lists products     | `tests/smoke/02-navigation.spec.ts`     | opens the "<category>" category (7 tests)             |
+| 4   | Search returns matching products                      | `tests/smoke/03-search.spec.ts`         | returns matching products for a known term            |
+| 5   | Search empty state works                              | `tests/smoke/03-search.spec.ts`         | shows an empty-state message when nothing matches     |
+| 6   | Invalid credentials are rejected                      | `tests/smoke/04-authentication.spec.ts` | rejects invalid credentials                           |
+| 7   | Valid credentials sign in and sign out                | `tests/smoke/04-authentication.spec.ts` | signs in with valid credentials and signs out again   |
+| 8   | Product detail shows name, price and add-to-cart      | `tests/smoke/06-product-detail.spec.ts` | shows name, price, quantity and add-to-cart controls  |
+| 9   | Add to cart → verify → remove                         | `tests/smoke/05-shopping-cart.spec.ts`  | adds a product to the cart, shows it, then removes it |
+| 10  | Saved session reaches the account page                | `tests/authenticated/account.spec.ts`   | saved session state opens the account page            |
 
 That is 16 tests in total because the category journey is generated once per category.
 

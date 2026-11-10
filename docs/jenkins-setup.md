@@ -4,12 +4,12 @@
 
 The pipeline runs on an agent labelled `linux`. It needs:
 
-| Requirement | Check |
-| --- | --- |
-| Node.js 20+ and npm | `node -v && npm -v` |
-| Chromium OS libraries | `npx playwright install-deps chromium` (needs root, one-off) |
-| Network access to the app URL | `curl -I https://demowebshop.tricentis.com` |
-| ~1 GB free disk | browser downloads + reports |
+| Requirement                   | Check                                                        |
+| ----------------------------- | ------------------------------------------------------------ |
+| Node.js 20+ and npm           | `node -v && npm -v`                                          |
+| Chromium OS libraries         | `npx playwright install-deps chromium` (needs root, one-off) |
+| Network access to the app URL | `curl -I https://demowebshop.tricentis.com`                  |
+| ~1 GB free disk               | browser downloads + reports                                  |
 
 `npx playwright install chromium` is run by the pipeline on every build; the download is
 cached in `~/.cache/ms-playwright` so repeat builds are fast.
@@ -66,12 +66,12 @@ Jenkins PR build.
 
 ## 6. Tuning
 
-| Symptom | Action |
-| --- | --- |
-| Builds exceed ten minutes | Increase `WORKERS`, or shard: `--shard=$STAGE/2` in parallel stages |
-| Flaky failures | Inspect the trace, fix the test, or tag `@quarantine` — don't raise retries |
-| Browser download slow | Cache `~/.cache/ms-playwright` on the agent |
-| Clock drift on cron | `H */2 * * *` deliberately avoids the top of the hour; adjust only if the maintenance window requires it |
+| Symptom                   | Action                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Builds exceed ten minutes | Increase `WORKERS`, or shard: `--shard=$STAGE/2` in parallel stages                                      |
+| Flaky failures            | Inspect the trace, fix the test, or tag `@quarantine` — don't raise retries                              |
+| Browser download slow     | Cache `~/.cache/ms-playwright` on the agent                                                              |
+| Clock drift on cron       | `H */2 * * *` deliberately avoids the top of the hour; adjust only if the maintenance window requires it |
 
 ## 7. Notifications
 
