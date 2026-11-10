@@ -1,0 +1,111 @@
+name: Daily manual cases
+
+on:
+  schedule:
+    # Once a day at 05:00 UTC: the three manual test cases and nothing else.
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Application under test
+        type: string
+        default: https://demowebshop.tricentis.com
+      workers:
+        description: Parallel workers
+        type: string
+        default: '2'
+  push:
+    # Fires once when this workflow itself changes, so the first published
+    # report can be verified without waiting for the nightly run.
+    paths:
+      - .github/workflows/daily-manual-cases.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-manual-cases
+  cancel-in-progress: false
+
+jobs:
+  manual-cases:
+    name: TC-001 / TC-002 / TC-003
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # publish the Allure report to the gh-pages branch
+    # Serialise with the CI smoke publish so both cannot push gh-pages at once.
+    concurrency:
+      group: gh-pages-publish
+      cancel-in-progress: false
+    env:
+      CI: true
+      WORKERS: ${{ inputs.workers || '2' }}
+      BASE_URL: ${{ inputs.base_url || vars.BASE_URL || 'https://demowebshop.tricentis.com' }}
+      TEST_USER: ${{ secrets.TEST_USER }}
+      TEST_PASS: ${{ secrets.TEST_PASS }}
+      ALLURE: 'on'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      # --project=chromium --no-deps keeps this to exactly the three cases:
+      # without them Playwright also runs the auth-setup project they depend on.
+      - name: Run the three manual cases
+        run: npx playwright test --grep @regression --project=chromium --no-deps
+      # Allure 3 keeps run-to-run history in .allure/history.jsonl, so the daily
+      # report keeps its trends; each key restores the newest history first.
+      - name: Restore Allure history
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .allure
+          key: allure-history-manual-${{ github.run_id }}
+          restore-keys: allure-history-
+      - name: Generate Allure report
+        if: always() && hashFiles('allure-results/**') != ''
+        run: npx allure generate allure-results -o allure-report --clean
+      - name: Upload Allure report
+        if: always() && hashFiles('allure-report/index.html') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-manual-cases
+          path: allure-report/
+          retention-days: 30
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-manual-cases
+          path: |
+            playwright-report/
+            results/junit.xml
+          retention-days: 14
+      # Served at https://<owner>.github.io/<repo>/ (site root), with the smoke
+      # pack's report kept alongside under /smoke/.
+      - name: Publish the report to GitHub Pages
+        if: always() && hashFiles('allure-report/index.html') != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./allure-report
+          keep_files: true
+          full_commit_message: Publish manual case report for ${{ github.sha }}
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-manual-cases
+          path: test-results/
+          retention-days: 7

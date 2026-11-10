@@ -114,6 +114,9 @@ GitHub Actions in `.github/workflows/` is the primary gate:
   `--project=chromium --no-deps`, which skips the login setup project.
 - `smoke.yml` runs every two hours (`cron('17 */2 * * *')`, UTC) and can be dispatched
   manually with a tag (`@smoke`, `@regression`, `@tc-003`) or a different `BASE_URL`.
+- `daily-manual-cases.yml` runs **only** the three manual test cases once a day
+  (`cron('0 5 * * *')`, UTC) with `--grep @regression --project=chromium --no-deps`, which
+  keeps the `auth-setup` project out, and publishes their Allure report to the site root.
 
 Both upload the HTML report and the JUnit XML, plus traces, videos and screenshots when a
 test fails. The Jenkins pipeline remains as a fallback and runs the same pack via
@@ -133,18 +136,19 @@ npm run report:allure:open                         # serves it on localhost
 
 ### Publishing the report
 
-`ci.yml` publishes every `main` build to the `gh-pages` branch with
-[`peaceiris/actions-gh-pages`](https://github.com/peaceiris/actions-gh-pages), which serves
-the report from:
+Two workflows publish to the same `gh-pages` branch with
+[`peaceiris/actions-gh-pages`](https://github.com/peaceiris/actions-gh-pages):
 
-```
-https://<owner>.github.io/playwright-typescript-test-automation_ai/
-```
+| Workflow                 | Contents               | URL                                       |
+| ------------------------ | ---------------------- | ----------------------------------------- |
+| `daily-manual-cases.yml` | TC-001, TC-002, TC-003 | `https://<owner>.github.io/<repo>/`       |
+| `ci.yml`                 | the smoke pack         | `https://<owner>.github.io/<repo>/smoke/` |
 
-One-time setup: **Settings → Pages → Build and deployment → Source: Deploy from a branch
-→ Branch: `gh-pages` → `/ (root)` → Save**. The branch is created by the first run that
-reaches the publish step. The Allure HTML report uses only relative URLs, so it works at
-that sub-path unchanged.
+One-time setup (already enabled for this repository): **Settings → Pages → Build and
+deployment → Source: Deploy from a branch → Branch: `gh-pages` → `/ (root)` → Save**. The
+Allure HTML report uses only relative URLs, so it works unchanged under any sub-path. Both
+publish jobs share the `gh-pages-publish` concurrency group, so they queue rather than race
+on the branch.
 
 The same job posts a run summary table on pull requests and a quality-gate check through
 the [Allure GitHub Action](https://allurereport.org/docs/integrations-github-action/)
